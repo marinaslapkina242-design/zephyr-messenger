@@ -68,6 +68,8 @@
                 <span id="onlineStatus" class="online-badge">🌟 0</span>
               </div>
               <div class="chat-actions">
+                <i class="fas fa-phone" id="callBtn" title="Звонок"></i>
+                <i class="fas fa-video" id="videoCallBtn" title="Видеозвонок"></i>
                 <i class="fas fa-palette" id="themeToggle" title="Сменить тему"></i>
                 <span style="color:#f5b042;font-size:14px;margin-right:10px;">🍊 <span id="headerCitrus">0</span></span>
                 <span id="userBadge"><i class="fas fa-user-astronaut"></i> <span id="currentUsername">user</span></span>
@@ -136,7 +138,6 @@
               </div>
             </div>
             
-            <!-- УГАДАЙ ЧИСЛО -->
             <div id="guessGame" class="game-content" style="display:none;">
               <div class="game-header"><h3>🎯 Угадай число <span style="font-size:14px;color:#f5b042;">🍊 +10 за победу</span></h3><button class="game-close" onclick="hideGame('guess')">✕</button></div>
               <p>Я загадал число от 1 до 100. Попробуй угадать!</p>
@@ -148,7 +149,6 @@
               <button class="guess-btn" id="guessBoostBtn" style="background:#f5b042;color:#1a1a3e;">💡 Подсказка (30 🍊)</button>
             </div>
 
-            <!-- САПЁР -->
             <div id="minesweeperGame" class="game-content" style="display:none;">
               <div class="game-header"><h3>💣 Сапёр <span style="font-size:14px;color:#f5b042;">🍊 +20 за победу</span></h3><button class="game-close" onclick="hideGame('minesweeper')">✕</button></div>
               <div class="minesweeper-stats"><span>💣 Мин: <span id="mineCount">10</span></span><span>🏆 Очки: <span id="mineScore">0</span></span></div>
@@ -157,7 +157,6 @@
               <button class="guess-btn" id="mineBoostBtn" style="background:#f5b042;color:#1a1a3e;">🔍 Миноискатель (50 🍊)</button>
             </div>
 
-            <!-- ТЕТРИС -->
             <div id="tetrisGame" class="game-content" style="display:none;">
               <div class="game-header"><h3>🧱 Тетрис <span style="font-size:14px;color:#f5b042;">🍊 +1 за линию</span></h3><button class="game-close" onclick="hideGame('tetris')">✕</button></div>
               <div class="tetris-wrapper">
@@ -180,7 +179,6 @@
               </div>
             </div>
 
-            <!-- ЗМЕЙКА -->
             <div id="snakeGame" class="game-content" style="display:none;">
               <div class="game-header"><h3>🐍 Змейка <span style="font-size:14px;color:#f5b042;">🍊 +5 за 10 очков</span></h3><button class="game-close" onclick="hideGame('snake')">✕</button></div>
               <div style="text-align:center;">
