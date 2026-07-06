@@ -17,14 +17,20 @@ const io = new Server(server, {
 
 const db = new sqlite3.Database('./database.sqlite');
 
-// ===== ТАБЛИЦЫ =====
+// ===== ТАБЛИЦЫ (БЕЗ ОШИБКИ duplicate column) =====
 db.serialize(() => {
+  // Проверяем, есть ли колонка citrus
   db.all("PRAGMA table_info(users)", (err, columns) => {
-    if (!err && !columns.some(c => c.name === 'citrus')) {
-      db.run("ALTER TABLE users ADD COLUMN citrus INTEGER DEFAULT 0");
+    if (!err && columns && !columns.some(c => c.name === 'citrus')) {
+      db.run("ALTER TABLE users ADD COLUMN citrus INTEGER DEFAULT 0", (err) => {
+        if (err && !err.message.includes('duplicate column')) {
+          console.error('Ошибка добавления citrus:', err);
+        }
+      });
     }
   });
 
+  // Создаём таблицы (безопасно)
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
