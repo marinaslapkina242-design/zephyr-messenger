@@ -874,3 +874,85 @@ body {
   .shop-grid { grid-template-columns: 1fr 1fr; }
   .snake-container canvas { width: 100%; height: auto; }
 }
+
+/* ===== ИСПРАВЛЕНИЕ ШИРИНЫ СООБЩЕНИЙ ===== */
+.message {
+  max-width: 65% !important;
+  width: auto !important;
+  min-width: 60px !important;
+  padding: 10px 16px !important;
+  border-radius: 18px !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
+
+.message-wrapper {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.msg-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* ===== КНОПКИ ЗВОНКОВ ===== */
+.chat-actions i.fa-phone,
+.chat-actions i.fa-video {
+  background: #1a1a3e;
+  padding: 8px 12px;
+  border-radius: 50%;
+  border: 1px solid #333366;
+  transition: 0.2s;
+  font-size: 16px;
+}
+
+.chat-actions i.fa-phone:hover,
+.chat-actions i.fa-video:hover {
+  background: #2a2a5e;
+  border-color: #7b6bff;
+  color: #7b6bff;
+}
+
+/* ===== ОКНО ЗВОНКА ===== */
+#callOverlay video {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #1a1a3e;
+}
+
+#callOverlay #localVideo {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  width: 150px;
+  height: auto;
+  border-radius: 12px;
+  border: 2px solid #7b6bff;
+  background: #1a1a3e;
+  object-fit: cover;
+}
+
+#callOverlay #endCallBtn {
+  background: #ff6b6b;
+  border: none;
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+  transition: 0.2s;
+  z-index: 10;
+}
+
+#callOverlay #endCallBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+}
