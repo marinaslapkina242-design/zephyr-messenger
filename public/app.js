@@ -399,6 +399,183 @@ function setupSocket() {
     clearTimeout(window.typingTimeout);
     window.typingTimeout = setTimeout(() => document.getElementById('typingIndicator').textContent = '', 2000);
   });
+
+  // ===== ВИДЕОЗВОНКИ (WebRTC) =====
+  socket.on('call signal', async ({ signal, type, from }) => {
+    if (type === 'offer') {
+      if (!confirm(`📞 ${from} звонит вам! Ответить?`)) {
+        socket.emit('call signal', { room: signal.room, type: 'reject', from: currentUser.username });
+        return;
+      }
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        callActive = true;
+        callRoom = signal.room;
+        showCallUI(true);
+        peerConnection = new RTCPeerConnection(configuration);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.ontrack = (event) => {
+          remoteStream = event.streams[0];
+          const videoEl = document.getElementById('remoteVideo');
+          if (videoEl) videoEl.srcObject = remoteStream;
+        };
+        peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit('call signal', {
+              room: callRoom,
+              signal: event.candidate,
+              type: 'candidate',
+              from: currentUser.username
+            });
+          }
+        };
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('call signal', {
+          room: callRoom,
+          signal: answer,
+          type: 'answer',
+          from: currentUser.username
+        });
+      } catch (e) {
+        console.error(e);
+        alert('❌ Ошибка ответа на звонок');
+        endCall();
+      }
+    }
+    if (type === 'answer' && peerConnection) {
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+    }
+    if (type === 'candidate' && peerConnection) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(signal));
+      } catch (e) {}
+    }
+    if (type === 'end' || type === 'reject') {
+      if (type === 'reject') alert(`❌ ${from} отклонил звонок`);
+      endCall();
+    }
+  });
+}
+
+// ===== ВИДЕОЗВОНКИ =====
+let localStream = null;
+let remoteStream = null;
+let peerConnection = null;
+let callActive = false;
+let callRoom = null;
+
+const configuration = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+function showCallUI(withVideo) {
+  const existing = document.getElementById('callOverlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'callOverlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  `;
+
+  overlay.innerHTML = `
+    <div style="position:relative;width:80%;max-width:600px;">
+      <video id="remoteVideo" autoplay playsinline style="width:100%;border-radius:16px;background:#1a1a3e;${withVideo ? '' : 'display:none;'}"></video>
+      <video id="localVideo" autoplay playsinline muted style="position:absolute;bottom:20px;right:20px;width:150px;border-radius:12px;border:2px solid #7b6bff;background:#1a1a3e;${withVideo ? '' : 'display:none;'}"></video>
+      <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;gap:20px;">
+        <button id="endCallBtn" style="background:#ff6b6b;border:none;color:#fff;padding:16px 24px;border-radius:50%;font-size:24px;cursor:pointer;box-shadow:0 0 30px rgba(255,0,0,0.3);">
+          <i class="fas fa-phone-slash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  if (localStream) {
+    const localVideo = document.getElementById('localVideo');
+    if (localVideo) localVideo.srcObject = localStream;
+  }
+
+  document.getElementById('endCallBtn')?.addEventListener('click', endCall);
+}
+
+function endCall() {
+  callActive = false;
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  if (peerConnection) {
+    peerConnection.close();
+    peerConnection = null;
+  }
+  remoteStream = null;
+  const overlay = document.getElementById('callOverlay');
+  if (overlay) overlay.remove();
+  if (callRoom) {
+    socket.emit('call signal', {
+      room: callRoom,
+      type: 'end',
+      from: currentUser.username
+    });
+    callRoom = null;
+  }
+}
+
+async function startCall(withVideo) {
+  if (callActive) { endCall(); return; }
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: withVideo
+    });
+    callActive = true;
+    callRoom = 'call_' + currentRoom;
+    showCallUI(withVideo);
+    peerConnection = new RTCPeerConnection(configuration);
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    peerConnection.ontrack = (event) => {
+      remoteStream = event.streams[0];
+      const videoEl = document.getElementById('remoteVideo');
+      if (videoEl) videoEl.srcObject = remoteStream;
+    };
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('call signal', {
+          room: callRoom,
+          signal: event.candidate,
+          type: 'candidate',
+          from: currentUser.username
+        });
+      }
+    };
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('call signal', {
+      room: callRoom,
+      signal: offer,
+      type: 'offer',
+      from: currentUser.username
+    });
+  } catch (e) {
+    console.error('Ошибка звонка:', e);
+    alert('❌ Нет доступа к камере/микрофону!');
+    endCall();
+  }
 }
 
 // ===== UI =====
@@ -478,6 +655,10 @@ function setupUI() {
   
   document.getElementById('voiceBtn').onclick = startRecording;
   document.getElementById('voiceStopBtn').onclick = stopRecording;
+
+  // КНОПКИ ЗВОНКОВ
+  document.getElementById('callBtn')?.addEventListener('click', () => startCall(false));
+  document.getElementById('videoCallBtn')?.addEventListener('click', () => startCall(true));
 
   document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
     item.onclick = function() {
@@ -805,11 +986,9 @@ document.getElementById('guessBoostBtn').onclick = async function() {
   if (guessBoostUsed) { alert('❌ Подсказка уже использована!'); return; }
   const used = await useBoost('guess');
   if (!used) {
-    // Покупаем если нет буста
     buyBoost('guess', 30);
     return;
   }
-  // Сужаем диапазон на 50%
   const half = Math.floor((guessMax - guessMin) / 2);
   if (guessNumber < guessMin + half) {
     guessMax = guessMin + half;
@@ -950,7 +1129,6 @@ document.getElementById('mineBoostBtn').onclick = async function() {
   if (!used) { buyBoost('minesweeper', 50); return; }
   
   mineBoostActive = true;
-  // Показываем все мины на 5 секунд
   for (let r = 0; r < mineRows; r++) {
     for (let c = 0; c < mineCols; c++) {
       if (mineBoard[r][c] === -1 && !mineRevealed[r][c]) {
@@ -960,7 +1138,6 @@ document.getElementById('mineBoostBtn').onclick = async function() {
   }
   renderMineBoard();
   mineBoostTimer = setTimeout(() => {
-    // Скрываем мины обратно
     for (let r = 0; r < mineRows; r++) {
       for (let c = 0; c < mineCols; c++) {
         if (mineBoard[r][c] === -1 && !mineFlagged[r][c]) {
@@ -1071,7 +1248,6 @@ function tetrisLockBlock() {
     tetrisLines += cleared;
     tetrisScore += cleared * 100 * tetrisLevel;
     tetrisLevel = Math.floor(tetrisLines / 5) + 1;
-    // +1 цитрусик за линию
     tetrisCitrus += cleared;
     addCitrus(cleared);
     document.getElementById('tetrisScore').textContent = tetrisScore;
@@ -1172,7 +1348,7 @@ document.getElementById('tetrisBoostBtn').onclick = async function() {
 };
 
 // ============================================================
-// ===== 4. ЗМЕЙКА (НОВАЯ) =====
+// ===== 4. ЗМЕЙКА =====
 // ============================================================
 let snakeGame2 = null;
 
@@ -1348,4 +1524,4 @@ function initGames() {
   showGame('guess');
 }
 
-console.log('🚀 ZEPHYR С ЦИТРУСИКАМИ ГОТОВ!');
+console.log('🚀 ZEPHYR С ЦИТРУСИКАМИ И ЗВОНКАМИ ГОТОВ!');
