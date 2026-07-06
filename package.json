@@ -1,0 +1,17 @@
+{
+  "name": "zephyr",
+  "version": "2.0.0",
+  "description": "Zephyr Messenger - Все функции",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "sqlite3": "^5.1.6",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5"
+  }
+}

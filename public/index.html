@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌌 Zephyr</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link id="themeStyle" rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ВХОД -->
+    <div id="loginScreen">
+      <div class="login-box">
+        <div class="logo-animated">🌌</div>
+        <h1>Zephyr</h1>
+        <p class="subtitle">Космический мессенджер</p>
+        <input type="text" id="loginUsername" placeholder="Имя пользователя">
+        <input type="password" id="loginPassword" placeholder="Пароль">
+        <button id="loginBtn"><i class="fas fa-rocket"></i> Войти</button>
+        <button id="registerBtn"><i class="fas fa-user-plus"></i> Регистрация</button>
+        <div id="loginError"></div>
+        <div class="demo-info">✨ Зарегистрируйся и общайся!</div>
+      </div>
+    </div>
+
+    <!-- ЧАТ -->
+    <div id="mainScreen" style="display:none;">
+      <div class="app">
+        <!-- САЙДБАР -->
+        <div class="sidebar">
+          <div class="logo">🌌</div>
+          <div class="nav-item active" data-tab="chats"><i class="fas fa-comment"></i><span>Чаты</span></div>
+          <div class="nav-item" data-tab="games"><i class="fas fa-gamepad"></i><span>Игры</span></div>
+          <div class="nav-item" data-tab="shop"><i class="fas fa-store"></i><span>Магазин</span></div>
+          <div class="nav-item" data-tab="profile"><i class="fas fa-user-astronaut"></i><span>Профиль</span></div>
+          <div class="nav-item" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Выйти</span></div>
+        </div>
+
+        <!-- ВКЛАДКА ЧАТЫ -->
+        <div id="chatsTab" class="tab-content" style="display:flex;">
+          <div class="chats-list">
+            <div class="chats-header">
+              <span>💫 Диалоги</span>
+              <div>
+                <i class="fas fa-search" id="searchToggle" title="Поиск"></i>
+                <i class="fas fa-plus" id="newChatBtn" title="Новый чат"></i>
+              </div>
+            </div>
+            <div id="searchBar" style="display:none;padding:0 16px 10px;">
+              <input type="text" id="searchInput" placeholder="🔍 Поиск по чату..." class="search-input">
+            </div>
+            <div id="chatList">
+              <div class="chat-item active" data-room="general">
+                <div class="avatar">🌐</div>
+                <div>
+                  <div class="name">Общий чат</div>
+                  <div class="msg" id="generalStatus">🌟 Онлайн: 0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="main-chat">
+            <div class="chat-header">
+              <div>
+                <span id="currentRoomName" class="room-name">Общий чат</span>
+                <span id="onlineStatus" class="online-badge">🌟 0</span>
+              </div>
+              <div class="chat-actions">
+                <i class="fas fa-palette" id="themeToggle" title="Сменить тему"></i>
+                <span style="color:#f5b042;font-size:14px;margin-right:10px;">🍊 <span id="headerCitrus">0</span></span>
+                <span id="userBadge"><i class="fas fa-user-astronaut"></i> <span id="currentUsername">user</span></span>
+              </div>
+            </div>
+
+            <div id="pinnedMessage" style="display:none;padding:8px 20px;background:#1a1a3e;border-bottom:1px solid #333366;font-size:13px;color:#f5b042;">
+              📌 Закреплено: <span id="pinnedText"></span>
+            </div>
+
+            <div class="messages" id="messageBox"></div>
+            <div id="typingIndicator"></div>
+
+            <div class="input-area">
+              <i class="fas fa-smile" id="emojiBtn"></i>
+              <i class="fas fa-image" id="imageBtn" title="Отправить фото"></i>
+              <i class="fas fa-microphone" id="voiceBtn" title="Голосовое сообщение"></i>
+              <i class="fas fa-sticky-note" id="stickerBtn" title="Стикеры"></i>
+              <input type="text" id="msgInput" placeholder="Напишите сообщение...">
+              <button class="send-btn" id="sendBtn">→</button>
+            </div>
+
+            <div id="emojiPanel">
+              <span onclick="addEmoji('😊')">😊</span>
+              <span onclick="addEmoji('😂')">😂</span>
+              <span onclick="addEmoji('❤️')">❤️</span>
+              <span onclick="addEmoji('🔥')">🔥</span>
+              <span onclick="addEmoji('👍')">👍</span>
+              <span onclick="addEmoji('🎉')">🎉</span>
+              <span onclick="addEmoji('😍')">😍</span>
+              <span onclick="addEmoji('🤣')">🤣</span>
+              <span onclick="addEmoji('💀')">💀</span>
+              <span onclick="addEmoji('✨')">✨</span>
+              <span onclick="addEmoji('🌟')">🌟</span>
+              <span onclick="addEmoji('🚀')">🚀</span>
+              <span onclick="addEmoji('👽')">👽</span>
+              <span onclick="addEmoji('🛸')">🛸</span>
+            </div>
+
+            <div id="stickerPanel" style="display:none;padding:12px 20px;background:#0d0d20;border-top:1px solid #222255;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="color:#8888bb;">😎 Стикеры</span>
+                <label for="stickerUpload" style="color:#6b5bff;cursor:pointer;"><i class="fas fa-plus"></i> Добавить</label>
+                <input type="file" id="stickerUpload" accept="image/*" style="display:none;">
+              </div>
+              <div id="stickerList" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+            </div>
+
+            <div id="voiceRecording" style="display:none;padding:12px 20px;background:#1a1a3e;border-top:1px solid #333366;text-align:center;color:#ff6b6b;">
+              <i class="fas fa-circle" style="animation:pulse 1s infinite;"></i> Запись... <span id="voiceTimer">0:00</span>
+              <button id="voiceStopBtn" style="background:#ff6b6b;border:none;color:#fff;padding:4px 16px;border-radius:20px;margin-left:10px;cursor:pointer;">⏹ Остановить</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА ИГРЫ -->
+        <div id="gamesTab" class="tab-content">
+          <div class="games-container">
+            <div class="games-menu">
+              <h2>🎮 ИГРЫ <span style="font-size:18px;color:#f5b042;">🍊 <span id="gamesCitrus">0</span></span></h2>
+              <div class="games-buttons">
+                <button class="game-btn" onclick="showGame('guess')">🎯 Угадай число</button>
+                <button class="game-btn" onclick="showGame('minesweeper')">💣 Сапёр</button>
+                <button class="game-btn" onclick="showGame('tetris')">🧱 Тетрис</button>
+                <button class="game-btn" onclick="showGame('snake')">🐍 Змейка</button>
+              </div>
+            </div>
+            
+            <!-- УГАДАЙ ЧИСЛО -->
+            <div id="guessGame" class="game-content" style="display:none;">
+              <div class="game-header"><h3>🎯 Угадай число <span style="font-size:14px;color:#f5b042;">🍊 +10 за победу</span></h3><button class="game-close" onclick="hideGame('guess')">✕</button></div>
+              <p>Я загадал число от 1 до 100. Попробуй угадать!</p>
+              <div class="guess-stats"><span>Попыток: <span id="guessAttempts">0</span></span><span>Диапазон: <span id="guessRange">1 - 100</span></span></div>
+              <input type="number" id="guessInput" placeholder="Введите число...">
+              <button class="guess-btn" id="guessBtn">Проверить</button>
+              <div id="guessResult" class="guess-result"></div>
+              <button class="guess-btn secondary" id="guessResetBtn">🔄 Новая игра</button>
+              <button class="guess-btn" id="guessBoostBtn" style="background:#f5b042;color:#1a1a3e;">💡 Подсказка (30 🍊)</button>
+            </div>
+
+            <!-- САПЁР -->
+            <div id="minesweeperGame" class="game-content" style="display:none;">
+              <div class="game-header"><h3>💣 Сапёр <span style="font-size:14px;color:#f5b042;">🍊 +20 за победу</span></h3><button class="game-close" onclick="hideGame('minesweeper')">✕</button></div>
+              <div class="minesweeper-stats"><span>💣 Мин: <span id="mineCount">10</span></span><span>🏆 Очки: <span id="mineScore">0</span></span></div>
+              <div id="mineBoard" class="mine-board"></div>
+              <button class="guess-btn secondary" id="mineResetBtn">🔄 Новая игра</button>
+              <button class="guess-btn" id="mineBoostBtn" style="background:#f5b042;color:#1a1a3e;">🔍 Миноискатель (50 🍊)</button>
+            </div>
+
+            <!-- ТЕТРИС -->
+            <div id="tetrisGame" class="game-content" style="display:none;">
+              <div class="game-header"><h3>🧱 Тетрис <span style="font-size:14px;color:#f5b042;">🍊 +1 за линию</span></h3><button class="game-close" onclick="hideGame('tetris')">✕</button></div>
+              <div class="tetris-wrapper">
+                <div><canvas id="tetrisCanvas" width="200" height="400"></canvas></div>
+                <div class="tetris-info">
+                  <div>Очки: <span id="tetrisScore">0</span></div>
+                  <div>Уровень: <span id="tetrisLevel">1</span></div>
+                  <div>Линии: <span id="tetrisLines">0</span></div>
+                  <div>🍊 <span id="tetrisCitrus">0</span></div>
+                  <div class="tetris-controls">
+                    <button onclick="tetrisMove('left')">◀</button>
+                    <button onclick="tetrisMove('right')">▶</button>
+                    <button onclick="tetrisMove('down')">▼</button>
+                    <button onclick="tetrisRotate()">🔄</button>
+                  </div>
+                  <button class="guess-btn" id="tetrisStartBtn">▶ Старт</button>
+                  <button class="guess-btn secondary" id="tetrisPauseBtn">⏸ Пауза</button>
+                  <button class="guess-btn" id="tetrisBoostBtn" style="background:#f5b042;color:#1a1a3e;">🐢 Медленный спад (40 🍊)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ЗМЕЙКА -->
+            <div id="snakeGame" class="game-content" style="display:none;">
+              <div class="game-header"><h3>🐍 Змейка <span style="font-size:14px;color:#f5b042;">🍊 +5 за 10 очков</span></h3><button class="game-close" onclick="hideGame('snake')">✕</button></div>
+              <div style="text-align:center;">
+                <div class="snake-stats">
+                  <span>🏆 Очки: <span id="snakeScore2">0</span></span>
+                  <span>⚡ Рекорд: <span id="snakeHighScore2">0</span></span>
+                  <span>🍊 <span id="snakeCitrus">0</span></span>
+                </div>
+                <canvas id="snakeCanvas2" width="400" height="400" style="border:2px solid #333366;border-radius:16px;background:#0a0a1a;"></canvas>
+                <div style="margin-top:10px;">
+                  <button class="guess-btn" id="snakeStartBtn2">▶ Старт</button>
+                  <button class="guess-btn secondary" id="snakePauseBtn2">⏸ Пауза</button>
+                  <button class="guess-btn secondary" id="snakeResetBtn2">🔄 Сброс</button>
+                  <button class="guess-btn" id="snakeBoostBtn2" style="background:#f5b042;color:#1a1a3e;">🐢 Замедление (35 🍊)</button>
+                </div>
+                <div style="margin-top:8px;font-size:12px;color:#6666aa;">Управление: стрелки или WASD</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА МАГАЗИН -->
+        <div id="shopTab" class="tab-content">
+          <div class="shop-container">
+            <div class="shop-header">
+              <h2>🛒 МАГАЗИН</h2>
+              <div class="shop-balance">🍊 <span id="shopCitrus">0</span></div>
+            </div>
+            <div class="shop-grid">
+              <div class="shop-item">
+                <div class="shop-item-icon">💡</div>
+                <div class="shop-item-name">Подсказка</div>
+                <div class="shop-item-desc">Сужает диапазон в Угадай число</div>
+                <div class="shop-item-price">🍊 30</div>
+                <button class="shop-buy-btn" onclick="buyBoost('guess', 30)">Купить</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🔍</div>
+                <div class="shop-item-name">Миноискатель</div>
+                <div class="shop-item-desc">Показывает все мины на 5 сек в Сапёре</div>
+                <div class="shop-item-price">🍊 50</div>
+                <button class="shop-buy-btn" onclick="buyBoost('minesweeper', 50)">Купить</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🐢</div>
+                <div class="shop-item-name">Медленный спад</div>
+                <div class="shop-item-desc">Скорость падения -50% в Тетрисе</div>
+                <div class="shop-item-price">🍊 40</div>
+                <button class="shop-buy-btn" onclick="buyBoost('tetris', 40)">Купить</button>
+              </div>
+              <div class="shop-item">
+                <div class="shop-item-icon">🐌</div>
+                <div class="shop-item-name">Замедление</div>
+                <div class="shop-item-desc">Скорость змеи -50% в Змейке</div>
+                <div class="shop-item-price">🍊 35</div>
+                <button class="shop-buy-btn" onclick="buyBoost('snake', 35)">Купить</button>
+              </div>
+            </div>
+            <div class="shop-boosts">
+              <h3>🎯 Активные бусты</h3>
+              <div id="activeBoosts">Нет активных бустов</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВКЛАДКА ПРОФИЛЬ -->
+        <div id="profileTab" class="tab-content">
+          <div class="profile-container">
+            <div class="profile-card">
+              <div class="profile-avatar-wrapper">
+                <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar">
+                <label for="avatarUpload" class="avatar-upload-btn"><i class="fas fa-camera"></i></label>
+                <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+              </div>
+              <div class="profile-info">
+                <h2 id="profileName">Username</h2>
+                <p id="profileBio" class="profile-bio">Нет био</p>
+                <p class="profile-date" id="profileDate">Зарегистрирован: </p>
+                <p style="color:#f5b042;font-size:20px;">🍊 <span id="profileCitrus">0</span></p>
+              </div>
+            </div>
+            
+            <div class="profile-edit">
+              <h3><i class="fas fa-edit"></i> Редактировать профиль</h3>
+              <textarea id="profileBioInput" placeholder="Напишите о себе..."></textarea>
+              <button id="saveProfileBtn" class="btn-save"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+
+            <div class="profile-users">
+              <h3><i class="fas fa-users"></i> Все пользователи</h3>
+              <div id="usersList" class="users-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО -->
+  <div id="newChatModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header"><h3><i class="fas fa-user-plus"></i> Новый чат</h3><span class="modal-close" id="modalClose">&times;</span></div>
+      <div class="modal-body">
+        <p>Выберите пользователя для начала диалога:</p>
+        <select id="userSelect" class="user-select"><option value="">-- Загрузка... --</option></select>
+        <button id="modalStartChat" class="btn-primary modal-btn"><i class="fas fa-comment"></i> Начать чат</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
